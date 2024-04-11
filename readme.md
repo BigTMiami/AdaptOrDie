@@ -20,24 +20,24 @@
 ## Classification Task
 ### Amazon Helpfullness: 
 * Roberta baseline: 
-    ** Notebook: Amazon_Helpfulness_Classification_Full_Dataset.ipynb
-    ** Model path: BigTMiami/amazon_helpfulness_classification_on_amazon_5M_model_corrected
+    * Notebook: Amazon_Helpfulness_Classification_Full_Dataset.ipynb
+    * Model path: BigTMiami/amazon_helpfulness_classification_on_amazon_5M_model_corrected
 * Domain-pretrained on ~5M: 
-    ** Notebook: Amazon_Helpfulness_Classification_on_5M_pretrained_model_corrected.ipynb
-    ** Model path: BigTMiami/amazon_helpfulness_classification_full
+    * Notebook: Amazon_Helpfulness_Classification_on_5M_pretrained_model_corrected.ipynb
+    * Model path: BigTMiami/amazon_helpfulness_classification_full
 * Domain-pretrained on ~25M:
-    ** Notebook: TBD
-    ** Model path: TBD
+    * Notebook: TBD
+    * Model path: TBD
 
 ### IMDB: 
 * Roberta baseline: 
-    ** Notebook: IMDB_Classification.ipynb
-    ** Model path: ltuzova/imdb_classification_roberta
+    * Notebook: IMDB_Classification.ipynb
+    * Model path: ltuzova/imdb_classification_roberta
 * Domain-pretrained on ~5M: 
-    ** Notebook: IMDB_Classification.ipynb
-    ** Model path: ltuzova/imdb_classification_on_5M_full_pretrained
+    * Notebook: IMDB_Classification.ipynb
+    * Model path: ltuzova/imdb_classification_on_5M_full_pretrained
 * Domain-pretrained on ~25M:
-    ** Notebook: IMDB_Classification.ipynb
-    ** Model path: ltuzova/imdb_classification_on_25M_full_pretrained
+    * Notebook: IMDB_Classification.ipynb
+    * Model path: ltuzova/imdb_classification_on_25M_full_pretrained
 
 # Adapters
