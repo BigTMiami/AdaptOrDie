@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score,  f1_score
 
 from datasets import load_dataset
 
-from transformers import AutoTokenizer, DataCollatorWithPadding
+from transformers import AutoTokenizer, DataCollatorWithPadding, EarlyStoppingCallback
 from transformers import TrainingArguments
 from transformers import AutoConfig
 
@@ -31,7 +31,8 @@ def compute_metrics(pred, average = 'macro'):
     }
     
     
-def train_classifier(output_dir, classification_task = 'imdb', pretrained_model = 'roberta-base', torch_compile = True):
+def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 'roberta-base', torch_compile = True,
+train = True, evaluate = True):
     print("Classification task: {0}, pretrained model: {1}".format(classification_task, pretrained_model))
     
     if classification_task == 'helpfulness':
@@ -65,8 +66,6 @@ def train_classifier(output_dir, classification_task = 'imdb', pretrained_model 
     
     model = AutoModelForSequenceClassification.from_pretrained(pretrained_model,  config=classification_config)
 
-    from transformers import TrainingArguments
-
     training_args = TrainingArguments(
         output_dir=output_dir,
         overwrite_output_dir=True,
@@ -75,7 +74,7 @@ def train_classifier(output_dir, classification_task = 'imdb', pretrained_model 
         learning_rate=2e-5, # Paper: this is for Classification, not domain training
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
-        num_train_epochs=10, # NEED TO TRAIN FOR REAL TEST
+        num_train_epochs=10, # Lyudmila: changed from 3 to 10 -> used for small roberta 
         weight_decay=0.01,
         warmup_ratio=0.06, # Paper: warmup proportion of 0.06
         adam_epsilon=1e-6, # Paper 1e-6 (huggingface default 1e-08)
@@ -85,17 +84,22 @@ def train_classifier(output_dir, classification_task = 'imdb', pretrained_model 
         save_total_limit=2, # Saves latest 2 checkpoints
         push_to_hub=True,
         hub_strategy="checkpoint", # Only pushes at end with save_model()
-        load_best_model_at_end=False, # Set to false - we want the last trained model like the paper
+        # Lyudmila: Changed to true -> ot seems according to repo and paper that they used early stopping and used best model
+        load_best_model_at_end=True, #Set to false - we want the last trained model like the paper
         torch_compile=torch_compile,  # Much Faster
         logging_strategy="steps", # Is default
         logging_steps=100, # Logs training progress
     )
+
+    # EarlyStoppingCallback with patience
+    early_stopping = EarlyStoppingCallback(early_stopping_patience=3) # from paper
     
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["dev"],
+        callbacks=[early_stopping],
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
@@ -103,7 +107,11 @@ def train_classifier(output_dir, classification_task = 'imdb', pretrained_model 
     
     print("Trainer args: {0}".format(trainer.args))
     
-    trainer.train()
-    trainer.evaluate(dataset["test"])
+    if train:
+      trainer.train()
+
+    if evaluate:
+      evaluation_result = trainer.evaluate(dataset["test"])
+      print(evaluation_result)
     
-    return trainer
+    return trainer, evaluation_result
