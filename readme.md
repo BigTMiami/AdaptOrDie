@@ -40,4 +40,20 @@
     * Notebook: IMDB_Classification.ipynb
     * Model path: ltuzova/imdb_classification_on_25M_full_pretrained
 
+### Metrics
+
+Comparison on Testing Set (best epoch, F1 Macro) (Table 5 from original paper)
+
+| Domain  | Task         | RoBERTa | DAPT (5M) | DAPT (25M)|
+| ------- | ------------ | ------- | --------- | --------- |
+| Reviews | Helpfullness | TBD     | TBD       | TBD       |
+| Reviews | IMDB         | 95.08   | 95.42     | TBD       |
+
+Metrics comparison on Dev Set (last epoch/best epoch, F1 Macro) (Table 15 from original paper)
+
+| Domain  | Task         | RoBERTa     | DAPT (5M)   | DAPT (25M) |
+| ------- | ------------ | ----------- | ----------- | --------- |
+| Reviews | Helpfullness | TBD         | TBD         | TBD       |
+| Reviews | IMDB         | 94.84/94.64 | 95.08/95.12 | TBD       |
+
 # Adapters
