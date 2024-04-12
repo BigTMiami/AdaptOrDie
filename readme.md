@@ -24,11 +24,17 @@
     * Notebook: Amazon_Helpfulness_Classification_Full_Dataset.ipynb - uses test dataset for eval
         * F1: 65.34
     * Model path: BigTMiami/amazon_helpfulness_classification_on_amazon_5M_model_corrected
-    * Notebook: Amazon_Helpfulness_Classification_Full_Dataset_DEV_EVAL.ipynb Eval on dev set instead of test
+    * Notebook: Amazon_Helpfulness_Classification_Full_Dataset_DEV_EVAL.ipynb
+        * Eval on dev set instead of test
         * F1: 65.35
 * Domain-pretrained on ~5M: 
     * Notebook: Amazon_Helpfulness_Classification_on_5M_pretrained_model_corrected.ipynb
+        * F1: 67.04
     * Model path: BigTMiami/amazon_helpfulness_classification_full
+    * Amazon_Helpfulness_Classification_on_5M_pretrained_model_using_dev_eval.ipynb 
+        * Eval on dev set instead of test
+        * Not sure if this loaded the correct model!
+        * F1: 
 * Domain-pretrained on ~25M:
     * Notebook: TBD
     * Model path: TBD
@@ -50,7 +56,7 @@ Comparison on Testing Set (best epoch, F1 Macro) (Table 5 from original paper)
 
 | Domain  | Task         | RoBERTa | DAPT (5M) | DAPT (25M)|
 | ------- | ------------ | ------- | --------- | --------- |
-| Reviews | Helpfullness | 65.34   | TBD       | TBD       |
+| Reviews | Helpfullness | 65.34   | 67.04     | TBD       |
 | Reviews | IMDB         | 95.08   | 95.42     | TBD       |
 
 Metrics comparison on Dev Set (last epoch/best epoch, F1 Macro) (Table 15 from original paper)
