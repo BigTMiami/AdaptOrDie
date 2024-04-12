@@ -66,3 +66,11 @@ Metrics comparison on Dev Set (last epoch/best epoch, F1 Macro) (Table 15 from o
 | Reviews | IMDB         | 94.84/94.64 | 95.08/95.12 | TBD       |
 
 # Adapters
+
+## Helpfullness Task
+
+
+| Adapter Type | Pretrain Size | Classification Size | F1 No Pre-Training | F1 With Pre-Training | Notebook                                  |
+| ------------ | ------------- | ------------------- | ------------------ | -------------------- | ----------------------------------------- |
+| seq_bn       | 2%            | 10%                 | 60.79              | 62.51                | BigTMiami/B_adapter_seq_bn_P_2_C_10.ipynb |
+ 
