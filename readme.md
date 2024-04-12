@@ -33,8 +33,7 @@
     * Model path: BigTMiami/amazon_helpfulness_classification_full
     * Amazon_Helpfulness_Classification_on_5M_pretrained_model_using_dev_eval.ipynb 
         * Eval on dev set instead of test
-        * Not sure if this loaded the correct model!
-        * F1: 
+        * F1: 67.54
 * Domain-pretrained on ~25M:
     * Notebook: TBD
     * Model path: TBD
@@ -63,7 +62,7 @@ Metrics comparison on Dev Set (last epoch/best epoch, F1 Macro) (Table 15 from o
 
 | Domain  | Task         | RoBERTa     | DAPT (5M)   | DAPT (25M) |
 | ------- | ------------ | ----------- | ----------- | --------- |
-| Reviews | Helpfullness | 65.35       | TBD         | TBD       |
+| Reviews | Helpfullness | 65.35       | 67.54       | TBD       |
 | Reviews | IMDB         | 94.84/94.64 | 95.08/95.12 | TBD       |
 
 # Adapters
