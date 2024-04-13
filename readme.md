@@ -70,7 +70,8 @@ Metrics comparison on Dev Set (last epoch/best epoch, F1 Macro) (Table 15 from o
 ## Helpfullness Task
 
 
-| Adapter Type | Pretrain Size | Classification Size | F1 No Pre-Training | F1 With Pre-Training | Notebook                                  |
-| ------------ | ------------- | ------------------- | ------------------ | -------------------- | ----------------------------------------- |
-| seq_bn       | 2%            | 10%                 | 60.79              | 62.51                | BigTMiami/B_adapter_seq_bn_P_2_C_10.ipynb |
+| Adapter Type | Pretrain Size | Cls TrainSize | F1 No Pre | F1 With Pre | Notebook                                  | LLM Loss |
+| ------------ | ------------- | ------------- | --------- | ----------- | ----------------------------------------- | -------- |
+| seq_bn       | 2%            | 10%           | 60.79     | 62.51       | BigTMiami/B_adapter_seq_bn_P_2_C_10.ipynb |          |
+| seq_bn       | 3%            | 15%           | 62.37     | 61.36       | BigTMiami/C_adapter_seq_bn_P_3_C_20.ipynb | 2.4084   |
  
