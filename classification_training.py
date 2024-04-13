@@ -31,8 +31,9 @@ def compute_metrics(pred, average = 'macro'):
     }
     
     
-def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 'roberta-base', torch_compile = True,
-train = True, evaluate = True):
+def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 'roberta-base', \
+ torch_compile = True,train = True, evaluate_on_test = True):
+    print("Early stopping with best val on f1 macro")
     print("Classification task: {0}, pretrained model: {1}".format(classification_task, pretrained_model))
     
     if classification_task == 'helpfulness':
@@ -56,11 +57,11 @@ train = True, evaluate = True):
         label2id = {0: 0, 1: 1}
 
     # Set Classifier Settings
-    classification_config = AutoConfig.from_pretrained(pretrained_model)
+    classification_config = AutoConfig.from_pretrained('roberta-base')
     classification_config.classifier_dropout = 0.1 # From Paper
     classification_config.num_of_labels = 2
     classification_config.id2label=id2label
-    classification_config.label2id=label2id,
+    classification_config.label2id=label2id
         
     print("Classification config: {0}".format(classification_config))
     
@@ -74,7 +75,9 @@ train = True, evaluate = True):
         learning_rate=2e-5, # Paper: this is for Classification, not domain training
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
-        num_train_epochs=10, # Lyudmila: changed from 3 to 10 -> used for small roberta 
+        # Lyudmila: changed from 3 to 10 -> used for small roberta
+        # Lyudmila: changed back to 3 as agreed
+        num_train_epochs=10,  
         weight_decay=0.01,
         warmup_ratio=0.06, # Paper: warmup proportion of 0.06
         adam_epsilon=1e-6, # Paper 1e-6 (huggingface default 1e-08)
@@ -85,24 +88,27 @@ train = True, evaluate = True):
         push_to_hub=True,
         hub_strategy="checkpoint", # Only pushes at end with save_model()
         # Lyudmila: Changed to true -> ot seems according to repo and paper that they used early stopping and used best model
+        # Lyudmila: Changed to false as agreed
         load_best_model_at_end=True, #Set to false - we want the last trained model like the paper
         torch_compile=torch_compile,  # Much Faster
         logging_strategy="steps", # Is default
         logging_steps=100, # Logs training progress
+        metric_for_best_model='f1_macro'
     )
 
     # EarlyStoppingCallback with patience
     early_stopping = EarlyStoppingCallback(early_stopping_patience=3) # from paper
+    # callbacks=[early_stopping],
     
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=dataset["train"],
         eval_dataset=dataset["dev"],
-        callbacks=[early_stopping],
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        callbacks=[early_stopping]
     )
     
     print("Trainer args: {0}".format(trainer.args))
@@ -110,8 +116,14 @@ train = True, evaluate = True):
     if train:
       trainer.train()
 
-    if evaluate:
-      evaluation_result = trainer.evaluate(dataset["test"])
-      print(evaluation_result)
+    if evaluate_on_test:
+      print("Evaluating model on test set")
+      test_evaluation_result = trainer.evaluate(dataset["test"])
+      print("Test set eval: {0}".format(test_evaluation_result))
+
+    else:
+      print("Evaluating model on dev set")
+      test_evaluation_result = trainer.evaluate(dataset["dev"])
+      print("Dev set eval: {0}".format(test_evaluation_result))
     
-    return trainer, evaluation_result
+    return trainer

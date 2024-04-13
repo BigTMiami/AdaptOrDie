@@ -7,63 +7,52 @@
 * IMDB Dataset: BigTMiami/imdb_sentiment_dataset
 
 # Reproducing Gururangan et. al on Review Dataset
+* Notebooks
+  * IMDB_Classification
+  * Helfullness_Classification
 
-## Domain Pretraining
-* Full dataset of ~25M reviews: 
-    * Notebook: Amazon_Domain_Full_Dataset_Pre_training_Model.ipynb
-    * Model path: ltuzova/amazon_domain_pretrained_model
-
-* Subset of ~5M reviews: 
-    * Notebook: Amazon_Domain_Pre_training_5M_Corrected.ipynb
-    * Model path: BigTMiami/amazon_pretraining_5M_model_corrected
-
-
-## Classification Task
-### Amazon Helpfullness: 
-* Roberta baseline: 
-    * Notebook: Amazon_Helpfulness_Classification_Full_Dataset.ipynb - uses test dataset for eval
-        * F1: 65.34
-    * Model path: BigTMiami/amazon_helpfulness_classification_on_amazon_5M_model_corrected
-    * Notebook: Amazon_Helpfulness_Classification_Full_Dataset_DEV_EVAL.ipynb
-        * Eval on dev set instead of test
-        * F1: 65.35
-* Domain-pretrained on ~5M: 
-    * Notebook: Amazon_Helpfulness_Classification_on_5M_pretrained_model_corrected.ipynb
-        * F1: 67.04
-    * Model path: BigTMiami/amazon_helpfulness_classification_full
-    * Amazon_Helpfulness_Classification_on_5M_pretrained_model_using_dev_eval.ipynb 
-        * Eval on dev set instead of test
-        * F1: 67.54
-* Domain-pretrained on ~25M:
-    * Notebook: TBD
-    * Model path: TBD
-
-### IMDB: 
-* Roberta baseline: 
-    * Notebook: IMDB_Classification.ipynb
-    * Model path: ltuzova/imdb_classification_roberta
-* Domain-pretrained on ~5M: 
-    * Notebook: IMDB_Classification.ipynb
-    * Model path: ltuzova/imdb_classification_on_5M_full_pretrained
-* Domain-pretrained on ~25M:
-    * Notebook: IMDB_Classification.ipynb
-    * Model path: ltuzova/imdb_classification_on_25M_full_pretrained
+| Experiment                              | Classification Task | Dataset                                                 | Model                                                                          |
+| --------------------------------------- | ------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Amazon Review Domain Pre-Training (25M) | \---                | BigTMiami/amazon_25M_reviews_condensed                  | ltuzova/amazon_domain_pretrained_model                                         |
+| Amazon Review Domain Pre-Training (5M)  | \---                | BigTMiami/amazon_split_25M_reviews_20_percent_condensed | BigTMiami/amazon_pretraining_5M_model_corrected                                |
+| Basline Classifier (RoBERTa)            | IMDB Sentiment      | BigTMiami/imdb_sentiment_dataset                        | ltuzova/imdb_classification_roberta_best_epoch_f1                              |
+| Basline Classifier (RoBERTa)            | Amazon Helpfulness  | BigTMiami/amazon_helpfulness                            | ltuzova/amazon_helpfulness_classification_roberta_best_f1                      |
+| Classifier (Domain Pre-Pretraining 5M)  | IMDB Sentiment      | BigTMiami/imdb_sentiment_dataset                        | ltuzova/imdb_classification_on_5M_full_pretrained_best_epoch_f1                |
+| Classifier (Domain Pre-Pretraining 5M)  | Amazon Helpfulness  | BigTMiami/amazon_helpfulness                            | ltuzova/amazon_helpfulness_classification_on_5M_full_pretrained_best_epoch_f1  |
+| Classifier (Domain Pre-Pretraining 25M) | IMDB Sentiment      | BigTMiami/imdb_sentiment_dataset                        | ltuzova/imdb_classification_on_25M_full_pretrained_best_epoch_f1               |
+| Classifier (Domain Pre-Pretraining 25M) | Amazon Helpfulness  | BigTMiami/amazon_helpfulness                            | ltuzova/amazon_helpfulness_classification_on_25M_full_pretrained_best_epoch_f1 |
 
 ### Metrics
 
-Comparison on Testing Set (best epoch, F1 Macro) (Table 5 from original paper)
+F1-macro for downstream classification (testing set, best epoch):
 
-| Domain  | Task         | RoBERTa | DAPT (5M) | DAPT (25M)|
-| ------- | ------------ | ------- | --------- | --------- |
-| Reviews | Helpfullness | 65.34   | 67.04     | TBD       |
-| Reviews | IMDB         | 95.08   | 95.42     | TBD       |
+|             | Basline Classifier (RoBERTa) | DAPT (5M) | DAPT (25M) |
+| ----------- | ---------------------------- | --------- | ---------- |
+| Helpfulness | 68.91                        | 70.00     | 69.89      |
+| IMDB        | 95.16                        | 95.33     | 95.70      |
 
-Metrics comparison on Dev Set (last epoch/best epoch, F1 Macro) (Table 15 from original paper)
+Comparison with results reported in the Table 5 of the paper (improvement in percent points and % against RoBERTa baseline):
 
-| Domain  | Task         | RoBERTa     | DAPT (5M)   | DAPT (25M) |
-| ------- | ------------ | ----------- | ----------- | --------- |
-| Reviews | Helpfullness | 65.35       | 67.54       | TBD       |
-| Reviews | IMDB         | 94.84/94.64 | 95.08/95.12 | TBD       |
+|                                    | Our Results     | Paper           |
+| ---------------------------------- | --------------- | --------------- |
+| Helfullness: DAPT (5M) vs RoBERTa  | 1.1 pp (0.016%) | \---            |
+| Helfullness: DAPT (25M) vs RoBERTa | 1 pp (0.014%)   | 1.4 pp (0.022%) |
+| IMDB: DAPT (5M) vs RoBERTa         | 0.2 pp (0.002%) | \---            |
+| IMDB: DAPT (25M) vs RoBERTa        | 0.5 pp (0.006%) | 0.4 pp (0.004%) |
+
+Masked LM loss on held-out Review documents before and after domain adaptation: 
+
+|                | DAPT (5M) | DAPT (25M) |
+| -------------- | --------- | ---------- |
+| RoBERTa        | 1.85      | 1.84       |
+| DAPT (Reviews) | 1.52      | 1.41       |
+
+Comparison with results reported in the Table 12 of the paper (decrease in loss):
+
+|                       | Our Results     | Paper           |
+| --------------------- | --------------- | --------------- |
+| DAPT (5M) vs RoBERTa  | \-0.3 (-0.18%)  | \---            |
+| DAPT (25M) vs RoBERTa | \-0.4 (-0.232%) | \-0.2 (-0.081%) |
 
 # Adapters
 
