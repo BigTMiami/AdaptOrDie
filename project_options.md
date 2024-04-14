@@ -152,6 +152,77 @@ Framework to review final push
 <img src="images/unipelt_diagram.png" width="600">
 </p>
 
+# Code Walk Through
+Setup model
+    from transformers import RobertaConfig
+    from adapters import AutoAdapterModel
+
+    config = RobertaConfig.from_pretrained("roberta-base")
+    classficiation_no_pretrain_model = AutoAdapterModel.from_pretrained(
+        "roberta-base",
+        config=config,
+    )
+
+Setup adapter
+
+    from adapters import SeqBnConfig
+
+    pretraining_adapter_config = SeqBnConfig()
+
+Add adapter
+
+    # Add a new adapter
+    classficiation_from_pretrain_model.add_adapter(classification_adapter_after_pretrained_name, config=classification_adapter_config)
+
+    # Add head for classification modeling
+    classficiation_from_pretrain_model.add_classification_head(
+        classification_adapter_after_pretrained_name,
+        num_labels=2,
+        id2label={ 0: "unhelpful", 1: "helpful"})
+
+    # Set the adapter to be used for training
+    classficiation_from_pretrain_model.train_adapter(classification_adapter_after_pretrained_name)
+
+
+Need to check what is loaded, active and set for training
+
+    summary = classficiation_from_pretrain_model.adapter_summary()
+    print(summary)
+
+    ================================================================================
+    Name                     Architecture         #Param      %Param  Active   Train
+    --------------------------------------------------------------------------------
+    AA_adp_seq_bn_P_micro_adapterbottleneck          894,528       0.718       1       0
+    AA_adp_seq_bn_P_micro_seq_bn_C_micro_adapterbottleneck          894,528       0.718       0       1
+    --------------------------------------------------------------------------------
+    Full model                               124,645,632     100.000               0
+    ================================================================================
+
+Loading and adding
+
+    # Load pre-trained adapter
+    load_name = f"BigTMiami/{pretrained_adapter_hub_name}"
+
+    # Load Pretrained adapter without head
+    loaded_adapter_name = classficiation_from_pretrain_model.load_adapter(load_name, with_head=False, set_active=True)
+
+    print(f"Loaded Pretrain Adapter Name: {load_name}")
+
+    classficiation_from_pretrain_model.add_adapter(classification_adapter_after_pretrained_name, config=classification_adapter_config)
+
+    # Add head for classification modeling
+    classficiation_from_pretrain_model.add_classification_head(
+        classification_adapter_after_pretrained_name,
+        num_labels=2,
+        id2label={ 0: "unhelpful", 1: "helpful"})
+
+    # Set the adapter to be used for training
+    classficiation_from_pretrain_model.train_adapter(classification_adapter_after_pretrained_name)
+
+    classficiation_from_pretrain_model.set_active_adapters([loaded_adapter_name, classification_adapter_after_pretrained_name])
+
+!!! Run adapter_summary() to make sure what is loaded active and training
+
 # Questions
 * Do we use best model on pre-training?
     * For this we would need to set a steps evaluation threshold
