@@ -4,7 +4,7 @@ from datasets import load_dataset
 
 
 def tokenize_function(examples):
-    return tokenizer(examples["text"])
+    return tokenizer(examples["text"], truncation=True)
 
 
 def group_texts(examples):
@@ -46,11 +46,23 @@ dataset = load_dataset(
 dataset
 dataset["train"][0]
 
+df = dataset["train"].to_pandas()
+labels = df["label"].unique().tolist()
+labels
+
+label2id = {label: i for i, label in enumerate(labels)}
+id2label = {i: label for i, label in enumerate(labels)}
+print(label2id)
+print(id2label)
+
+# Update labels
+dataset = dataset.map(lambda examples: {"label": label2id[examples["label"]]})
+
 # Tokenize the dataset
 tokenizer = AutoTokenizer.from_pretrained("roberta-base")
 block_size = tokenizer.model_max_length
 
-dataset_tokenized = dataset.map(tokenize_function, batched=True, remove_columns=["id", "text", "label"])
+dataset_tokenized = dataset.map(tokenize_function, batched=True, remove_columns=["id", "text"])
 
 dataset_tokenized
 dataset_tokenized["train"][0]
@@ -61,8 +73,11 @@ datset_name = "amazon_MICRO_helpfulness_dataset"
 dataset_tokenized.push_to_hub(datset_name)
 
 
+# Need to run this to get rid of label column
+dataset_tokenized_2 = dataset.map(tokenize_function, batched=True, remove_columns=["id", "text", "label"])
+
 # Condense the dataset
-condensed_dataset = dataset_tokenized.map(
+condensed_dataset = dataset_tokenized_2.map(
     group_texts,
     batched=True,
     batch_size=346,
