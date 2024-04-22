@@ -1,0 +1,28 @@
+Our first goal was to reproduce results from Gururangan 2020 \cite{gururangan2020don}  for Domain Adaptive Pre-Training (DAPT), Task Adaptive Pre-Training (TAPT) for at least one domain.  This would allow us to create a nuts and bolts understanding of the pre-training process and ensure we could make it work.
+
+\subsubsection{DAPT Training}
+Our first unexpected challenge related to data.  Our proposal research had shown that this paper had an online repository that held both the code and data used for the paper.  While the Task data was available as expected, the Domain data, which was much larger, was not.  We decided to focus on the Amazon Review data because we were able to identify what we think is a similar source.  Gururangan 2020 identifies  He, McAuley 2016 \cite{amazonData} as the Domain data source, which led to Ni, Li, McAuley \cite{amazonData_Part_2} paper, which in turn has a website with Amazon reviews.  
+
+Gururangan 2020 describes 24.76 million reviews in their dataset.  McAuley's site contained several versions, none of which matched this.  We chose a filtered set (5-core) of the 2018 dataset, as we thought it was most likely closest to the original. It contained 37 different categories with a total of 75 million reviews.  We sampled each category proportionally to get to 25 million and shuffled then shuffled the data.
+
+A key challenge we had anticipated was the computational load of running LLM models.  The roberta-base model we used contains ~124 million parameters.  While relatively small by today's standards, this is still quite large when performing training.  Gururangan 2020 used a large batch size for DAPT pre-training, which required the use of gradient accumulation.  While this allows training to fit into memory, smaller batch sizes creates longer the run times.  The pre-training performs Masked Language Modeling, which does not use labels, so we did have one option.  The context window for the roberta-base model is 512 tokens and the average review was 87 tokens long.  Each training batch was mostly empty, but used the same amount of memory for computing gradients for backprop.  We could put almost 6 reviews on average in each row, increasing training efficiency by almost a factor of 6, while still exposing the model to the same number of reviews.  We used this for all DAPT pre-training.  We were not able to use this enhancement for classification, because a label is attached for each review preventing mingling of different reviews. 
+
+One other improvement we were able to use on the initial reproduction was the use of PyTorch compilation.  Since version 2.0, PyTorch allows for compilation of the computation graph, which in our case almost doubled performance, even with the overhead associated with the compilation.  This brings us to our second unexpected challenge, which was the effective age of the Gururangan 2020 codebase.  The versions of tools needed to run the allennlp tool set \cite{gardner-etal-2018-allennlp} are quite old and we were not able to install them on the Google Colab platform \cite{k}.  One of our team members had access to a local environment with some computational resources where she was able to make adjustments to allow for installation, but it was tedious.  This highlighted the importance of using a robust set of platform tools that will be kept current and working.
+
+At this point we worked in parallel, with one team member reproducing results using code from the paper and another reproducing the papers results using the HuggingFace transformers platform \cite{i} to reproduce the results in Google Colab.  The huggingface platform provides several powerful tools for Deep Learning.
+
+Stored datasets and our trained models on the hugging face platform - add appendix?
+
+
+We used the roberta-base HuggingFace module 
+
+\subsubsection{Classification}
+
+F1 score
+Dataset imbalance
+
+\subsubsection{TAPT Training}
+
+\subsection{Replicating using Adapters}
+
+\subsection{Adapter Exploration}

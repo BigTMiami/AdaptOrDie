@@ -1,0 +1,98 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{subfiles}
+\usepackage{array}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Adapters as a Pre-training Tool for Enhanced Performance\\
+Adapt Or Die : CS 7643}
+
+\author{Anthony Menninger, Jacob G Ressler-Craig,   Liudmila Tuzova\\
+Georgia Institute of Technology\\
+{\tt\small amenninger3@gatech.edu, jgrc3@gatech.edu, ltuzova3@gatech.edu }
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+\subfile{sections/abstract}
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+\section{Introduction/Background/Motivation}
+
+\subfile{sections/intro}
+
+\section{Approach}
+
+Our project had three main phases: reproduce initial pre-training results, replicate the results using an adapter architecture and explore potential novel benefits in using adapters.
+
+\subsection{Reproducing Results}
+
+\subfile{sections/approach}
+
+\section{Experiments and Results}
+
+\subfile{sections/experiments}
+
+\subfile{sections/results}
+
+\section{Analysis and Conclusion}
+
+\subfile{sections/analysis}
+
+\section{Work Division}
+
+\begin{table*}[hbt!]
+\begin{center}
+\begin{tabular}{|l|c|p{8cm}|}
+\hline
+Student Name & Contributed Aspects & Details \\
+\hline\hline
+Anthony Menninger & TBD & TBD \\
+Jacob G Ressler-Craig& TBD & TBD \\
+Liudmila Tuzova & TBD & TBD \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Contributions of team members.}
+\label{tab:contributions}
+\end{table*}
+
+ADD PARAGRAPH. Table is added and needs to be filled in.  This all counts after the 6 page limit.
+
+\newpage
+\newpage
+
+
+{\small
+\bibliographystyle{ieee_fullname}
+\bibliography{sections/references}
+}
+
+
+\end{document}

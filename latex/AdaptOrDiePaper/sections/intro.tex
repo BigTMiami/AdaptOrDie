@@ -1,0 +1,46 @@
+%
+(5 points) What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon. 
+Pretraining
+
+1. Replicate results of Don't Stop Pretraining - efficacy of domain-adaptive and task-adaptive pre-training on LLMs across different datasets when it comes to a classification task
+2. Test the Don't Stop Pretraining protocol for DAPT and TAPT on adapters. Testing across a range of adapter architectures and sizes as well as hyperparams
+3. Explore the effects of data set size for adapter pretraining? Can adapter-pretraining learn specific context/texts more efficiently than existing methods.
+
+(5 points) How is it done today, and what are the limits of current practice?
+Don't Stop Pretraining paper - pretraining existing LLM (RoBERTa)
+Adapters - current application
+
+(5 points) Who cares? If you are successful, what difference will it make? 
+Allows for more efficient (less data and less compute) LLM finetuning.
+
+
+(5 points) What data did you use? Provide details about your data, specifically choose the most important aspects of your data mentioned 
+Amazon reviews data
+Amazon helpfulness labeled
+CS domain for methodology assurance and further reports
+%
+
+
+% ACTUAL INTRO 
+Large language models (LLMs) powered by the transformer architecture form the foundation for a significant amount of the AI advancements and AI-hype seen today, enabling technologies such as AI chat-bots, LLM-driven search engines, and even the discussion of artificial general intelligence \cite{vaswani2017attention}. These large language models consist of hundreds of millions of parameters that are trained on huge, heterogeneous corpuses of data \cite{liu2019roberta}. While they perform impressively when tested across general domains, they often require an extra push, or pre-training, to perform competitively on a specific area or task, such as medical diagnosis \cite{wang2018glue, gururangan2020don}. However, taking an existing LLM model, such as RoBERTa, and tuning it to a specific task proves challenging. This topic was addressed by Gururangan et. al. in their 2020 paper "Don't Stop Pretraining", which proved the benefits of domain-adaptive and task-adaptive pretraining (DAPT/TAPT) on multiple domains and classification tasks. They showed that continued pretraining on a domain (DAPT) consistently improved performance on classification tasks from that target domain \cite{gururangan2020don}. They also showed that pre-training the model on a much smaller but directly task-related corpus greatly improved performance, with or without being combined with DAPT \cite{gururangan2020don}.
+
+In this paper, we explore an ‘adapter’-based alternative to this domain and task-adaptive pretraining. Adapters are small subarchitectures that allow for efficient and lightweight fine-tuning of pre-trained Transformer-based LLMs for specific, downstream tasks. Instead of updating all the parameters of the pre-trained LM when fine-tuning, they freeze the existing pre-trained weights and introduce a small subarchitecture of new parameters to the model to be updated in the learning \cite{poth2023adapters, pfeiffer2020adapterhub}. These adapters are incredibly parameter-efficient, often under 1\% of the full model's parameters, and modular. They have been shown previously to provide competitive performance with full fine-tuning in transfer learning \cite{pfeiffer2020adapterhub}.
+
+We explore the performance of adapters after DAPT, TAPT, and DAPT+TAPT on downstream classification tasks. We compare these performances to replicated full-model pretrainings from the Gururangan paper \cite{gururangan2020don}. We also look at the performance of adapter-pretraining on reduced datasets, asking the question if adapters can more efficiently transfer learn from a small corpus of domain or task-specific data than a full transformer-based model. We look at multiple adapter architectures in our study, comparing both the performance of small bottleneck style adapters, like SeqBN, as well as large prefix-bottleneck combined UniPELT adapters over pretraining and dataset size \cite{pfeiffer2020mad, mao2021unipelt}.
+
+
+
+Asking the question???
+
+What does this solve???
+Competitive adapter-based domain and task-adaptive pretraining methods would allow for efficient and modular transfer learning of existing LLMs to specific tasks. In addition, it would allow the composition of multiple pre-trained adapter for highly competitive multi-subject performance. 
+
+
+DataSets: Amazon reviews, Amazon reviews helpfulness
+Model: Roberta-base
+For our project, we use the pre-trained RoBERTa large language model \cite{liu2019roberta}. It is a transformer-based architecture trained using masked language modeling objective on over 160 GB of unlabeled raw text. We attach additional adapter architectures to the model using AdapterHub \cite{pfeiffer2020adapterhub}. We use the Amazon REVIEWS and review helpfulness and sentiment datasets for DAPT and TAPT respectively \cite{amazonData}. This data was created for \textbf{blank purpose by blank}... \textbf{What is this data - size?} \textbf{Collection process}\textbf{Data labeling} \textbf{Uses} \textbf{Access}
+
+
+
+
+Background
