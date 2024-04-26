@@ -3,15 +3,42 @@ Large language models (LLMs) powered by the transformer architecture form the fo
 
 % Taking an existing LLM, such as RoBERTa, and tuning it to a specific task proves challenging. 
 
-This topic was addressed by Gururangan et. al. in their 2020 paper "Don't Stop Pretraining", which proved the benefits of domain-adaptive and task-adaptive pretraining (DAPT/TAPT) on multiple domains and classification tasks. Pre-training describes the method by which an existing model can be trained on additional data, often domain or task-specific, to improve its recollection before being fine-tuned for a specific task. Gurungaran et. al. were able to show that continued pretraining of the model on a domain (DAPT) consistently improved performance on classification tasks from that target domain \cite{gururangan2020don}. They also showed that pretraining the model on a much smaller but directly task-related corpus greatly improved performance on that classification task, with or without being combined with DAPT \cite{gururangan2020don}. However, these current methods require tuning over the whole model, large domain and task-specific datasets, and computationally expensive training times.
+This topic was addressed by Gururangan et. al. in their 2020 paper "Don't Stop Pretraining" \cite{gururangan2020don}, which proved the benefits of domain-adaptive and task-adaptive pretraining (DAPT/TAPT) on multiple domains and classification tasks. Pretraining describes the method by which an existing model can be trained on additional data, often domain or task-specific, to improve its recollection before being fine-tuned for a specific task. Gurungaran et. al. were able to show that continued pretraining of the model on domain data (DAPT) consistently improved performance on classification tasks from that target domain . They also showed that pretraining the model on the actual data used in the classification task (TAPT) greatly improved performance on that classification task, with or without being combined with DAPT \cite{gururangan2020don}. However, these current methods require tuning over the whole model with computationally expensive training times using large domain and/or task-specific datasets.
 
 In this paper, we explore an ‘adapter’-based alternative to domain and task-adaptive pretraining that would allow for fast, data-efficient model tuning. Adapters are small sub-networks that can be plugged into the existing transformer blocks. Instead of updating all the parameters of the pre-trained language model when training adapters, the original model is frozen and only the parameters of the introduced sub-architecture are updated in learning \cite{poth2023adapters, pfeiffer2020adapterhub}. Adapters are incredibly parameter-efficient, often under 1\% of the full model's parameters, and modular. They have been shown previously to provide competitive performance with full fine-tuning in transfer learning \cite{pfeiffer2020adapterhub}.
 
 We ask the question if instead of tuning the entire model via DAPT and TAPT for some sub-task, can we get similar if not better performance by attaching and pretraining an adapter. We explore and compare the performance of adapters after DAPT, TAPT, and combined DAPT+TAPT on downstream classification tasks to that of full-model pretraining replicated from the Gururangan paper \cite{gururangan2020don}. We also look at the performance of adapter pretraining on reduced datasets, asking the question if adapters can more efficiently transfer learn from a small corpus of domain or task-specific data than a full transformer-based model. We look at multiple adapter architectures in our study, evaluating the performance of small bottleneck style adapters, like SeqBN, as well as large prefix-and-bottleneck combined UniPELT adapters over different pretraining methods and dataset sizes \cite{pfeiffer2020mad, mao2021unipelt}. 
 
 % Difference between adapters
-Bottleneck adapters consist of two normalized feed forward layers, where one layer downscales the output and the other upscales. The Pfeiffer adapter we implement is inserted after the feed forward block in each Transformer layer \cite{pfeiffer2020mad}. As the RoBERTa base model consists of 12 stacks of Transformer-encoder layers, the RoBERTa with added Pfeiffer configuration will have 12 bottleneck adapters consisting of 894,528 added parameters in total \cite{pfeiffer2020mad, pfeiffer2020adapterhub}. In contrast, UniPELT combines multiple adapter methods, including LORA, Prefix Tuning, and bottleneck adapters, across different areas of the Transformer layer and implements a gating mechanism that controls submodule activation \cite{mao2021unipelt}. For the RoBERTa model, it has 11,083,376 parameters to be trained \cite{pfeiffer2020adapterhub}.
+Bottleneck adapters consist of two normalized feed forward layers, where one layer downscales the output and the other upscales. The Pfeiffer adapter we implement is inserted after the feed forward block in each Transformer layer \cite{pfeiffer2020mad}. As the RoBERTa base model consists of 12 stacks of Transformer-encoder layers, the RoBERTa with added Pfeiffer configuration will have 12 bottleneck adapters consisting of 894,528 added parameters in total \cite{pfeiffer2020mad, pfeiffer2020adapterhub}, as seen in \textbf{Table \ref{tab:adapter_parameters}}. In contrast, UniPELT combines multiple adapter methods, including LORA, Prefix Tuning, and bottleneck adapters, across different areas of the Transformer layer and implements a gating mechanism that controls submodule activation \cite{mao2021unipelt}. For the RoBERTa model, it has 11,083,376 parameters to be trained \cite{pfeiffer2020adapterhub}.
+
+\begin{table}[hbt!]
+\begin{center}
+\begin{tabular}{ | c | r | r | }
+\hline
+Model Adapter & Parameters (M)  & \% of Model \\
+\hline\hline
+roberta-base model & 124.6 & 100.0\% \\
+\hline\hline
+Sequential Bottleneck & .9 & .7\% \\
+\hline
+Parallel Bottleneck & .9 & .7\% \\
+\hline
+UniPelt & 11.1 & 8.9\% \\
+\hline
+\end{tabular}
+\end{center}
+\caption{The parameter count used by different adapters.  Both the sequential and parallel bottleneck use a reduction factor of 16.}
+\label{tab:adapter_parameters}
+\end{table}
 
 Competitive adapter-based domain and task-adaptive pretraining methods would allow for efficient and modular transfer learning of existing LLMs to specific tasks. In addition, it would allow the composition of multiple pre-trained adapters for highly competitive, single-model multi-subject performance. 
 
 For our project, we use the pre-trained RoBERTa large language model \cite{liu2019roberta}. It is a transformer-based architecture trained using masked language modeling objective on over 160 GB of unlabeled raw text. We attach additional adapter architectures to the model using AdapterHub \cite{pfeiffer2020adapterhub}. We use the Amazon REVIEWS dataset for DAPT and the Amazon review helpfulness, IMBD review sentiment, and citation intent datasets for TAPT and classification tasks \cite{amazonData,amazonHelpfulness,imbdData,citationIntentData}. The training sizes and label distributions of the three classification datasets are shown in \textbf{Figure \ref{fig:dataset_analysis}}. The Amazon REVIEWS dataset consists of 24.75 million full Amazon reviews across different product domains, compiled in text form for the purpose of language model training \cite{amazonData, amazonData_Part_2}. This dataset was used for domain-adaptive pre-training using masked-language modeling. The Amazon review helpfulness dataset consists of 200,000 Amazon reviews with attached helpfulness labels to be used for positive/negative language classification \cite{amazonHelpfulness}. The IMBD sentiment dataset consists of 100,000 IMDB full-text movie reviews with positive or negative sentiment labels for half of the reviews. This was originally constructed for training sentiment analysis models \cite{imbdData}. The citation intent dataset consists of 1,947 scientific citations labeled by function to be used for language classification \cite{citationIntentData}. Our code, pretrained models, and datasets are publicly available \cite{Hugging Face and Github}.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth]{figures/dataset_analysis.png}
+\caption{This shows the three datasets used in classification.  The left shows the different sizes of training sets while the right shows the percentage of label types.}
+\label{fig:dataset_analysis}
+\end{figure}

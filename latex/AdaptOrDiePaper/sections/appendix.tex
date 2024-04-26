@@ -1,0 +1,90 @@
+\begin{table}[ht]
+\centering
+\caption{Micro ParBn}
+\small  % This reduces the font size
+\begin{tabular}{|c|c|}
+\hline
+\textbf{No Pretraining}& \textbf{TAPT}\\
+\hline
+\hline
+\multicolumn{2}{|c|}{\textbf{par\_bn, reduction factor 16, LR 0.0003	}} \\
+\hline
+65.86 & \textbf{66.70}\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{par\_bn\_v2, LR 0.0003}} \\
+\hline
+65.86 &\textbf{66.22} \\
+\hline
+ \multicolumn{2}{|c|}{\textbf{par\_bn\_v3, LR 0.0003}} \\
+\hline
+65.86 &\textbf{66.09} \\
+\hline
+ \multicolumn{2}{|c|}{\textbf{par\_bn\_v4, LR 0.0003}} \\
+\hline
+65.86 &\textbf{66.41} \\
+\hline
+\end{tabular}
+\label{table:8}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Micro ParBn - Sources}
+\small  % This reduces the font size
+\begin{tabular}{|c|c|}
+\hline
+\textbf{No Pretraining}& \textbf{TAPT}\\
+\hline
+\hline
+\multicolumn{2}{|c|}{\textbf{Citation Intent}} \\
+\hline
+63.28 & \textbf{63.92}\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{IMDB}} \\
+\hline
+48.57 &\textbf{48.61} \\
+\hline
+ \multicolumn{2}{|c|}{\textbf{Helpfulness using Citation Intent Pretrain}} \\
+\hline
+\textbf{65.86} & 65.42\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{Helpfulness using IMDB Pretrain}} \\
+\hline
+\textbf{65.86 }& 65.82\\
+\hline
+\end{tabular}
+\label{table:9}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Micro ParBn - Training Epochs}
+\small  % This reduces the font size
+\begin{tabular}{|c|c|}
+\hline
+\textbf{No Pretraining}& \textbf{TAPT}\\
+\hline
+\hline
+\multicolumn{2}{|c|}{\textbf{5 Epoch Pretraining}} \\
+\hline
+\textbf{65.86} & 63.22\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{10 Epoch Pre-Training}} \\
+\hline
+65.86 & \textbf{66.70}\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{20 Epoch Pre-Training}} \\
+\hline
+\textbf{65.86} & 65.04\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{40 Epoch Pre-Training}} \\
+\hline
+65.86 & \textbf{66.44}\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{80 Epoch Pre-Training}} \\
+\hline
+65.86 & \textbf{65.97}\\
+\hline
+\end{tabular}
+\label{table:10}
+\end{table}

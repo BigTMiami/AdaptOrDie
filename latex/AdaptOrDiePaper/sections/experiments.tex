@@ -238,16 +238,7 @@ See Table \ref{table:6} for results. The results show that there is no significa
 \label{table:6}
 \end{table}
 
-\subsubsection{Adapters Scaling: TAPT on Micro-Sets Experiments}
-\textbf{Experiments Setup.}
-The goal of this set of experiments was to evaluate the effect of the TAPT pre-training on the baseline performance while varying differen parameters, such as the size of the training set, the number of training epochs, the sources of the pretraining, and the learning rate.
 
-\textbf{[Tony: Add details here]}
-
-\textbf{Results and Analysis.}
-
-Table \ref{table:7}, Table \ref{table:8}, \ref{table:9}, and \ref{table:10} shows the results of the experiments.
-\textbf{[Tony: Add details here]}
 
 \begin{table}[ht]
 \centering
@@ -278,93 +269,47 @@ Table \ref{table:7}, Table \ref{table:8}, \ref{table:9}, and \ref{table:10} show
 \label{table:7}
 \end{table}
 
-\begin{table}[ht]
-\centering
-\caption{Micro ParBn}
-\small  % This reduces the font size
-\begin{tabular}{|c|c|}
-\hline
-\textbf{No Pretraining}& \textbf{TAPT}\\
-\hline
-\hline
-\multicolumn{2}{|c|}{\textbf{par\_bn, reduction factor 16, LR 0.0003	}} \\
-\hline
-65.86 & \textbf{66.70}\\
-\hline
- \multicolumn{2}{|c|}{\textbf{par\_bn\_v2, LR 0.0003}} \\
-\hline
-65.86 &\textbf{66.22} \\
-\hline
- \multicolumn{2}{|c|}{\textbf{par\_bn\_v3, LR 0.0003}} \\
-\hline
-65.86 &\textbf{66.09} \\
-\hline
- \multicolumn{2}{|c|}{\textbf{par\_bn\_v4, LR 0.0003}} \\
-\hline
-65.86 &\textbf{66.41} \\
-\hline
-\end{tabular}
-\label{table:8}
-\end{table}
+\subsubsection{Adapters Scaling: TAPT on Micro-Sets Experiments}
+\textbf{Experiments Setup.}
+The goal of this set of experiments was to evaluate the effect of the TAPT pre-training on classification performance by varying the amount of training.
 
-\begin{table}[ht]
-\centering
-\caption{Micro ParBn - Sources}
-\small  % This reduces the font size
-\begin{tabular}{|c|c|}
-\hline
-\textbf{No Pretraining}& \textbf{TAPT}\\
-\hline
-\hline
-\multicolumn{2}{|c|}{\textbf{Citation Intent}} \\
-\hline
-63.28 & \textbf{63.92}\\
-\hline
- \multicolumn{2}{|c|}{\textbf{IMDB}} \\
-\hline
-48.57 &\textbf{48.61} \\
-\hline
- \multicolumn{2}{|c|}{\textbf{Helpfulness using Citation Intent Pretrain}} \\
-\hline
-\textbf{65.86} & 65.42\\
-\hline
- \multicolumn{2}{|c|}{\textbf{Helpfulness using IMDB Pretrain}} \\
-\hline
-\textbf{65.86 }& 65.82\\
-\hline
-\end{tabular}
-\label{table:9}
-\end{table}
 
-\begin{table}[ht]
+\textbf{Results and Analysis.}
+
+First we investigated if we would see a TAPT benefit using the smaller Micro Help dataset using 1, 5 and 10 epochs of pre-training.  When using 1 epoch, we reduced the batch size and removed gradient accumulation so that we would have more training steps.   \textbf{Figure \ref{fig:micro_help_class_vs_pretraining_epochs} } shows that we were able to produce a positive result with just 1 epoch, which was very encouraging.  10 epochs showed better results, but 5 showed worse.  We can see the standard deviation on 5 epochs is much higher, so we did another experiment looking at more pre training.  
+
+
+\begin{figure}[!htb]
 \centering
-\caption{Micro ParBn - Training Epochs}
-\small  % This reduces the font size
-\begin{tabular}{|c|c|}
-\hline
-\textbf{No Pretraining}& \textbf{TAPT}\\
-\hline
-\hline
-\multicolumn{2}{|c|}{\textbf{5 Epoch Pretraining}} \\
-\hline
-\textbf{65.86} & 63.22\\
-\hline
- \multicolumn{2}{|c|}{\textbf{10 Epoch Pre-Training}} \\
-\hline
-65.86 & \textbf{66.70}\\
-\hline
- \multicolumn{2}{|c|}{\textbf{20 Epoch Pre-Training}} \\
-\hline
-\textbf{65.86} & 65.04\\
-\hline
- \multicolumn{2}{|c|}{\textbf{40 Epoch Pre-Training}} \\
-\hline
-65.86 & \textbf{66.44}\\
-\hline
- \multicolumn{2}{|c|}{\textbf{80 Epoch Pre-Training}} \\
-\hline
-65.86 & \textbf{65.97}\\
-\hline
-\end{tabular}
-\label{table:10}
-\end{table}
+\includegraphics[width=\linewidth]{figures/micro_help_class_vs_pretraining_epochs.png}
+\caption{This shows the results of TAPT on the Amazon Helpfulness 5k reviews dataset using different amounts of pre training.}
+\label{fig:micro_help_class_vs_pretraining_epochs}
+\end{figure}
+
+\textbf{Figure \ref{fig:micro_class_vs_epochs} } shows that the evaluation loss of the masked language model pre-training does not seem to be correlated to classification results. As loss goes down, classification results move up and down.
+
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth]{figures/micro_class_vs_epochs.png}
+\caption{This shows the results of classification with three different datasets before and after Task Adaptive PreTraining (TAPT)}
+\label{fig:micro_class_vs_epochs}
+\end{figure}
+
+Having established that just 1 epoch of pre-training is effective, we wanted to confirm that worked for other datasets.  \textbf{Figure \ref{fig:micro_class_1_epoch_pretrain} } shows that 1 epoch of pre training improved classification results for all three datasets, which provides a diversity of size, data balance and domain.  
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth]{figures/micro_class_1_epoch_pretrain.png}
+\caption{This shows the positive impact of doing only 1 epoch of TAPT pre training across three different datasets, which are of different size, balanced and imbalanced}
+\label{fig:micro_class_1_epoch_pretrain}
+\end{figure}
+
+At this point, we had a very useful finding, but also a concern.  The classification using no TAPT uses a randomly initialized adapter.  Was the pre-training step simply creating a word focused initialization that really was not specific to the task data?   \textbf{Figure \ref{fig:micro_class_pretrain_datasets} } compares the Micro Help classification task using different pre trained adapters.  This shows that classification only improved with the task specific pre training, not with pre training on different sets of task data.  
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth]{figures/micro_help_class_cross_pretrain.png}
+\caption{This shows classification results for the Amazon Helpfulness 5k reviews dataset with using different TAPT pre trained models.}
+\label{fig:micro_class_pretrain_datasets}
+\end{figure}
