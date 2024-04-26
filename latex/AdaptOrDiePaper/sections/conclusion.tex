@@ -1,0 +1,16 @@
+The experiments demonstrated that using an adapter-based pre-training and fine-tuning can replicate the results reached with full pre-training and fine-tuning. Using adapters for task- and domain- adaptation improves the results on the downstream classification task for most of the configurations.
+
+Using adapters has the benefits:
+\begin{itemize}
+    \item Adapters are relatively small and easily shareable
+    \item Using adapters may mitigate some problems related to the full fine-tuning, such as catastrophic forgetting
+    \item Training adapters may take less time, though it depends on the adapter configuration and other parameters
+\end{itemize}
+
+When using adapters, it is critical to perform hyper-parameter tuning. One of the most important parameters is the learning rate. Our experiments demonstrated that using a higher learning rate compared to one used in the full fine-tuning lead to a significant increase in performance results. 
+
+In our experiments, we focused on two architectures: SeqBN and Unipelt. Both SeqBN (more simple) and Unipelt (more complex) adapter architectures demonstrated similar results with somewhat higher baseline performance for the Unipelt.
+
+In the "micro" experiments, we demonstrated that even small amounts of pre training with task classification data improves classification when using an adapter architecture. A future area for review would be determining if Masked Language Modeling concurrent with classification can improve classification.  It is not clear how to develop an efficient parallel architecture to do this because the tasks uses somewhat different data structures.
+
+Another possible project development option is comparing full fine-tuning and adapter-based tuning for multi-task applications. With multi-task goals, the benefit of using adapters may be even more prominent, as access to multiple-task data is not always available, and sequential training may lead to catastrophic forgetting. Adding and combining multi-purpose adapters may be highly beneficial in such scenarios.
