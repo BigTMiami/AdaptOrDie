@@ -13,16 +13,16 @@ A challenge we had anticipated was the computational load of running LLM models.
 
 \textbf{For TAPT}, the task-specific data was used for the MLM fine-tuning. The dataset consists of the same samples that are further used for downstream classification (without labels). Just as we did for domain pretraining, we created a set of condensed datasets from the Task data to speed pretraining.
 
-\textbf{Codebase.} Another unexpected challenge was the effective age of the Gururangan et al. codebase \cite{dontstoppretraining2020}. We instead implemented pretraining using the up-to-date Hugginface's Transformers API \cite{huggingface_transformers}, which allowed us to use standardized ways for the tasks, such as tokenization, data collection, and training loops. We also used the Hugginface's API for storing and exchanging datasets and models \cite{datasets}. This modification also allowed for the sharing of models and datasets, providing great value for group research.
+\textbf{Codebase.} Another unexpected challenge was the effective age of the Gururangan et al. codebase \cite{dontstoppretraining2020}. We instead implemented pretraining using the up-to-date Hugginface's Transformers API \cite{huggingface_transformers}, which allowed us to use standardized methods for deep learning tasks, such as tokenization, data collation, and training loops. We also used the Hugginface's API for storing and exchanging datasets and models \cite{datasets}. This modification also allowed for the sharing of models and datasets, providing great value for group research.  Our code, pretrained models, and datasets are publicly available \cite{github_repo}. 
 % , as we could upload the pre-processed datasets and pre-trained models so that each team member could have access.
 
 \subsubsection{Classification}
 The impact of the DAPT and TAPT pretraining was then assessed on the downstream classification task.
 
 \textbf{Dataset.}
-For classification, we used three datasets: Amazon Helpfulness, IMDB Review Sentiment, and Citation Intent. 
+For classification, we used three datasets: Amazon Helpfulness, IMDB Review Sentiment, and Citation Intent. \textbf{Figure \ref{fig:dataset_analysis}} shows two key aspects of these datasets. The primary dataset used was Amazon Helpfulness. This is both the largest as well as very imbalanced. We can also see that the Citation Intent dataset is quite imbalanced (as seen in figure \ref{fig:dataset_analysis}. 
 
-\textbf{Figure \ref{fig:dataset_analysis}} shows two key aspects of these datasets. The primary dataset used was Amazon Helpfulness. This is both the largest as well as very imbalanced. We can also see that the Citation Intent dataset is quite imbalanced (as seen in figure \ref{fig:dataset_analysis}. Gururangan et al. use an F1 Macro score for evaluation, which is a good measure for imbalanced data. The ``Macro" setting weights each class equally.
+% Gururangan et al. use an F1 Macro score for evaluation, which is a good measure for imbalanced data. The ``Macro" setting weights each class equally.
 
 \textbf{Codebase.}
 As with the pretraining stage, we faced challenges with the original repository being outdated. The classification code also relied on the AllenNLP framework which is no longer supported \cite{dontstoppretraining2020}. We were still able to run experiments using the original repo with two modifications: we replaced the unsupported BertAdam optimizer with the AdamW and used the last release of AllenNLP. We then replicated the same pipeline using Hugging Face's Transformers API \cite{huggingface_transformers} for the same task. Starting with an old code and switching to a new framework helped us to ensure we didn't introduce any new elements in the classification task.

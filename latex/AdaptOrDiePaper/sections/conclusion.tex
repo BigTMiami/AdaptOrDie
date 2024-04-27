@@ -1,6 +1,6 @@
 The experiments showed that using adapter-based pretraining and fine-tuning can replicate the results reached with full pretraining and fine-tuning. This implies significant benefits. Adapters are relatively small and easily shareable; using adapters may mitigate some problems related to full fine-tuning, such as catastrophic forgetting; training adapters may take less time.
 
-When using adapters, it is critical to perform hyper-parameter tuning. Our experiments demonstrated that using a higher learning rate compared to one used in full fine-tuning led to a significant increase in performance results. This makes sense considering the comparatively small size of adapters.
+When using adapters, it is critical to perform hyper-parameter tuning. Our experiments demonstrated that using a higher learning rate compared to one used in full fine-tuning led to a significant increase in performance results. This makes sense considering the comparatively small size and random initialization of adapters.
 
 In our experiments, we focused on two architectures: SeqBN and Unipelt. Both SeqBN (more simple) and Unipelt (more complex) adapter architectures demonstrated similar results with somewhat higher baseline performance for the Unipelt as could be expected given the considerably larger complexity of Unipelt and training length.
 

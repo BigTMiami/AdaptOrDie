@@ -1,5 +1,8 @@
-\begin{appendices}
-\section {Additional Tables for Adapters Scaling Experiments}
+
+\subsection {Code Base}
+Code used in our paper is located at https://github.com/BigTMiami/AdaptOrDie \cite{github_repo}.  Part of that code located in the dont-stop-pretraining-modified folder is an update of the code used in Gururangan et al. 2020 paper \cite{gururangan2020don} needed to make it usable on modern software.
+
+\subsection {Additional Tables for Adapters Scaling Experiments}
 \begin{table}[ht]
 \centering
 \caption{Micro SeqBn}
@@ -29,7 +32,7 @@
 \label{table:7}
 \end{table}
 
-\begin{table}[Ht]
+\begin{table}[ht]
 \centering
 \caption{Micro ParBn}
 \small  % This reduces the font size
@@ -58,7 +61,7 @@
 \label{table:8}
 \end{table}
 
-\begin{table}[Ht]
+\begin{table}[ht]
 \centering
 \caption{Micro ParBn - Sources}
 \small  % This reduces the font size
@@ -87,7 +90,7 @@
 \label{table:9}
 \end{table}
 
-\begin{table}[Ht]
+\begin{table}[ht]
 \centering
 \caption{Micro ParBn - Training Epochs}
 \small  % This reduces the font size
@@ -120,8 +123,8 @@
 \label{table:10}
 \end{table}
 
-\section {Additional Tables for Pre-Training Results}
-\begin{table*}[Ht]
+\subsection {Additional Tables for Pre-Training Results}
+\begin{table*}[ht]
 \label{appendix:masked_lm_full}
 \centering
 \caption{Full Pretraining: Masked LM Perplexity}
@@ -138,7 +141,7 @@ Perplexity (After) & 4.554 & 4.109 & 4.281  & 4.240  \\
 \label{table:1}
 \end{table*}
 
-\begin{table*}[Ht]
+\begin{table*}[ht]
 \label{appendix:masked_lm_adapters}
 \centering
 \caption{Adapter-Based Pre-training: Masked LM Perplexity}
@@ -162,7 +165,6 @@ Perplexity (After) & 4.75 & 4.39 & 4.62  & 4.27  \\
 \label{table:11}
 \end{table*}
 
-\section {Training Configurations}
+\subsection {Training Configurations}
 \label{appendix:train_config}
 
-\end{appendices}
