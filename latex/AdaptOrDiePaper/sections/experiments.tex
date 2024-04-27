@@ -1,61 +1,30 @@
+Model performance is evaluated using the F1-Macro score throughout.
+
 \subsection{Reproducing Experiments}
-The goal of the first set of experiments was to replicate the result reported by \cite{gururangan2020don} on the Reviews domain. We chose this domain primarily because it allowed us to assess the effect of both domain- and task-adaptive pre-training on the downstream classification tasks, considering that the domain dataset for this task is significantly smaller than for other domains.
+The goal of the first set of experiments was to replicate the result reported by Gururangan et al.
 
 \subsubsection{Reproducing: Pretraining}
-
 \textbf{Experiments Setup.}
-The first step was to reproduce the pre-training stage. We tested multiple configurations of pre-training:
-\begin{enumerate}
-\item DAPT (25M): domain-pretraining on 25 millions of reviews (as in the original paper)
-\item DAPT (5M): domain-pretraining on 5 millions (20\%) of reviews
-\item TAPT 1: task-pretraining on the whole set of task data but with limiting the training to 20 epochs
-\item TAPT 2: task-pretraining on the 20\% of task data trained on 100 epochs
-\item DAPT/TAPT: domain and task-pretraining on 5M reviews and 20\% of task data
-\end{enumerate}
-
-For each of these configurations we performed the masked language modeling task with a masking probability of 15\% as is in the original paper; see the detailed training configurations in the \textbf{Appendix}.
-
-We tested multiple configurations of DAPT and TAPT here, in order to assess whether there is an improvement on a subset of training data and to further decide whether we can proceed with a reduced amount of data for adapters experiments to speed up experiments.
+The first step was to reproduce the pretraining stage. We tested multiple configurations of pretraining: DAPT on 25M reviews, DAPT on 5M reviews, TAPT on full data with 20 epochs (1), and TAPT on 20\% data (2). For each configuration, we performed the MLM task with a masking probability of 15\% as is in the original paper. We pretrained the model for 1 epoch (full pass) for DAPT, 20 epochs for TAPT 1, and 100 epochs for TAPT 2. See the details in the \textbf{Appendix \ref{appendix:train_config}}. We tested multiple configurations of DAPT and TAPT to assess whether there is an improvement in a subset of training data and to further decide if we can proceed with a reduced amount of data for adapters to speed up the experiments.
 
 \textbf{Results and Analysis}. 
-Table \ref{table:1}  shows the perplexity on the withheld set of documents for the pre-training tasks calculated before and after the pre-training is done. For each of the configurations, we got a decrease in the perplexity, which indicates the effectiveness of the pre-training stage.
+The masked LM loss was calculated before and after pretraining; see \textbf{Appendix} \ref{appendix:masked_lm_adapters} for details. The \textbf{loss was decreased} on each configuration, which indicated the effectiveness of the pretraining. The impact on the downstream task was then assessed with further experiments.
 
-\begin{table*}[ht]
-\centering
-\caption{Full Pretraining: Masked LM Perplexity}
-\small  % This reduces the font size
-\begin{tabular}{|l|c|c|c|c|c|}
-\hline
-& \textbf{DAPT (5M)} & \textbf{DAPT (25M)} & \textbf{TAPT 1} & \textbf{DAPT/TAPT}  \\
-\hline
-\hline
-Perplexity (Before) & 6.360 & 6.297 & 6.360 & 6.360  \\
-Perplexity (After) & 4.554 & 4.109 & 4.281  & 4.240  \\
-\hline
-\end{tabular}
-\label{table:1}
-\end{table*}
-
-\subsubsection{Reproducing: Downstream Classification}
+\subsubsection{Reproducing: Classification}
 
 \textbf{Experiments Setup.}
-The next step was to assess the effect of the pre-training step on the downstream classification task. Our main focus was on the Helpfulness task, where pre-trained models showed a more significant impact on the downstream classification performance. For the downstream classification task, we used two frameworks:
-\begin{enumerate}
-    \item The \textbf{don't-stop-pretraining} library \cite{dontstoppretraining2020} referenced in the original paper with the following modifications: use the last release of the AllenNLP framework, and replace BertAdam optimizer with AdamW optimizer in the classifier configuration file. The BertAdam is not supported by PyTorch anymore, and was replaced with the AdamW.
-    \item \textbf{Up-to-date Hugging Face's Transformers API} \cite{huggingface_transformers}
-\end{enumerate}
-We used two different classification approaches to reproduce the original pipeline and ensure we achieve similar results with both an old and new framework. The ultimate goal was to switch to an up-to-date Transformers framework for further experiments with adapters. This newer framework offers greater flexibility and reflects the state-of-the-art environment. The same dataset was used for the classification task as in the original paper; see the detailed training configurations in the \textbf{Appendix}.
+The next step was to assess the effect of the pretraining step on the downstream classification task. Our main focus was on the \textbf{Helpfulness} task, where using pretrained models showed a more significant impact. We trained the classifier for 10 epochs and chose the best model based on F1-Macro on the validation set; we then calculated the F1-Macro on the testing set; see the details in the \textbf{Appendix}.
 
 \textbf{Results and Analysis.}
 Table \ref{table:2} shows the results of the classification (averaged across 5 runs).
 
 \begin{table*}[ht]
 \centering
-\caption{Full Fine-Tuning Results (Helpfullness Task): F1-Macro}
+\caption{Full Fine-Tuning Results (Helpfulness Task): F1-Macro}
 \small  % This reduces the font size
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-& \textbf{Base RoBERTa}& \textbf{DAPT (5M)} & \textbf{DAPT (25M)} & \textbf{TAPT} & \textbf{DAPT/TAPT} \\
+& \textbf{RoBERTa}& \textbf{DAPT (5M)} & \textbf{DAPT (25M)} & \textbf{TAPT} & \textbf{DAPT/TAPT} \\
 \hline
 \hline
 Out Results & $69.09_{0.65}$ & $69.10_{1.37}$ & $\mathbf{69.74_{0.70}}$ &  TAPT 1: $69.23_{0.83}$, TAPT 2: $69.49_{1.01}$ & $68.37_{0.70}$ \\
@@ -65,18 +34,14 @@ Original Paper & $65.10_{3.4}$ & --- & $66.5_{1.4}$ & $69.2_{2.4}$ & $\mathbf{69
 \label{table:2}
 \end{table*}
 
-We observed the following trends:
-\begin{itemize}
-    \item There is an improvement in most of the experiments with pre-trained models (both DAPT and TAPT) compared to the baseline RoBERTa, which supports the results of the original paper that pre-training helps to improve the baseline metrics. 
-    \item There is a slight decrease in DAPT + TAPT model. Pre-training on both domain and task data may result in more complex dynamics in language modeling. In the original paper, the DAPT+ TAPT also did not always lead to a greater improvement compared to either DAPT or TAPT used alone. The difference with the original paper maybe explained by the difference in the DAPT dataset used for pre-training.
-    \item The average F1-Macro of the baseline RoBERTa is higher than the one reported in the original paper and is closer to the pre-trained-based results: 69.09 compared to the 65.10 reported in the paper.
-\end{itemize}
+We observed that there is an \textbf{improvement in most of the experiments with pretrained models} compared to the baseline RoBERTa, which supports the results of the original paper. A \textbf{slight decrease} was observed in the DAPT + TAPT model. Pretraining on both domain and task data may result in more complex dynamics in language modeling. In the original paper, the DAPT+TAPT also did not always lead to a greater improvement compared to either DAPT or TAPT used alone. The difference with the paper may be explained by the difference in the DAPT dataset used for pretraining.
 
-There might be a couple of reasons why we got higher RoBERTa baseline metrics. First, the updated optimizer may lead to some changes in the training results. Second, it is not specified which exact configurations were used by the authors to compare performance on downstream tasks. In the original paper, the authors mention in the Table 14 that they used “3 or 10 epochs” of training. The original repository also includes different classification configurations, such as small (10 epochs, batch size 16), mini (10 epochs, batch size 8), and big (3 epochs, batch size 16). Also, it is not specified whether the authors used the same configuration for RoBERTa base classifier, and adapted models. When running a classifier with a “big” configuration from the repository, we got an average F1-Macro of $\mathbf{67.40_{1.47}}$ which is closer to what was reported in the paper, however, the lower metric is explained by the model to be under-trained. After completing our research and examining additiona literature, we found an independent paper \cite{he2021}, where the authors reported a similar difference in the baseline metric. They reported the F1-Macro of $\mathbf{69.1_{0.6}}$ for the baseline RoBERTa classification on the Helpfulness task which is very close to what we got.
+The \textbf{average F1-Macro of the baseline RoBERTa is higher} than the \textbf{one reported} in the original paper and is closer to the pretrained-based results: \textbf{69.09} compared to the \textbf{65.10 }reported in the paper. 
+The updated optimizer could lead to some changes in the training results. Also, the authors of the original paper do not specify which configurations were used to compare downstream tasks and whether they used the same configuration for the RoBERTa base classifier and pretrained models. The authors mention that they used “3 or 10 epochs” of training. The original repository also includes different configurations: small (10 epochs, batch size 16), mini (10 epochs, batch size 8), and big (3 epochs, batch size 16). When training with a “big” option we got an average F1-Macro of $\mathbf{67.40_{1.47}}$, which is closer to what was reported in the paper. However, the lower metric is explained by the model to be \textbf{under-trained}. After completing our research and examining additional literature, we found a paper \cite{he2021}, where the authors independently got a similar difference in the baseline metric. They reported the F1-Macro of $\mathbf{69.1_{0.6}}$ for the baseline RoBERTa classification which is very close to what we got.
 
-In our further experiments, we decided to use the same configuration of the classification model that allows the model to converge (10 epochs, 16 batch size) for both RoBERTa and task- or domain-adapted models to eliminate the influence of the configuration, and focus on the impact of the pre-training stage itself; see the detailed configuration we used in \textbf{Appendix}.
+We decided to use the same configuration of the classification model that allows the model to converge (10 epochs, 16 batch size) for both RoBERTa and task- or domain-adapted models to mitigate the influence of the configuration, and focus on the impact of the pretraining stage itself; see the detailed configuration we used in \textbf{Appendix} \ref{appendix:train_config}.
 
-To support the observed improvement in the baseline with pre-training, we also performed a subset of experiments on the second downstream task reported in the original paper (IMDB task). Table \ref{table:3} shows the results. As for the Helpfulness task, we got an improvement in the baseline with DAPT pretraining on both 5M and 25M reviews. The baseline and improved metrics are close to those reported in the original paper.
+To support the observed improvement in the baseline with pretraining, we also performed a subset of experiments on the second IMDB downstream task reported in the paper. Table \ref{table:3} shows the results. As for the Helpfulness, we got an improvement in the baseline with DAPT pretraining on both 5M and 25M reviews. The baseline and improved metrics are close to those reported in the original paper.
 
 \begin{table}[ht]
 \centering
@@ -95,60 +60,33 @@ Original Paper & 95.0 & 95.4 & \textbf{95.5} \\
 \end{table}
 
 \subsection{Adapters Experiments}
-The goal of this set of experiments was to repeat the steps outlined in the original paper \cite{gururangan2020don}, but to use adapters for the DAPT and TAPT tasks instead of performing an entire model pre-training and fine-tuning. We used two types of adapters architectures here: SeqBN proposed by \cite{pfeiffer2020adapterhub} and Unipelt proposed in \cite{mao2021unipelt}. The main goal was to compare the impact of smaller and larger adapter on the performance.
-
-For the DAPT task we limited further experiments to using 5M records of domain data which helped us to significantly speed-up the experiments. 
+The goal of this set of experiments was to repeat the steps outlined in the original paper but to use adapters for the DAPT and TAPT tasks instead of performing an entire model pretraining and fine-tuning.
 
 \subsubsection{Adapters: Pretraining}
 \textbf{Experiments Setup.}
-Similar to reproducing part, we tested multiple configurations of pre-training with adapters: DAPT (5M), TAPT 1 (100\%, 20 epochs), TAPT 2 (20\%, 100 epochs), and DAPT + TAPT on 5M reviews and 20\% of task data.
+Similar to the reproducing part, we tested multiple configurations of pretraining with adapters: DAPT (5M), TAPT 1 (100\%, 20 epochs), TAPT 2 (20\%, 100 epochs), and DAPT + TAPT on 5M reviews and 20\% of task data.
 
-For each of this configuration we performed the masked language modeling task with masking probability of 15\%. We used Huggingface Transformers API to run pre-training. 
-
-While for the full-pretraining the whole set of weights have been updated, with adapters only a small subset of weights was tuned. See the detailed training configurations in \textbf{Appendix.}
+For each configuration, we performed the MLM task with a masking probability of 15\%. We used the same number of pretraining epochs as for the full pertaining. While for the full pretraining, the whole set of weights has been updated, with adapters, only a small subset of weights was tuned. See the details in \textbf{Appendix} \ref{appendix:train_config}.
 
 \textbf{Results and Analysis.}
-Table \ref{table:11} shows the perplexity of the Masked LM task for the adapters pre-training. As for the full pre-training there is a decrease in perplexity, indicating effective pre-training using adapters.
-
-\begin{table*}[ht]
-\centering
-\caption{Adapter-Based Pre-training: Masked LM Perplexity}
-\small  % This reduces the font size
-\begin{tabular}{|l|c|c|c|c|c|}
-\hline
-& \textbf{DAPT (5M)} & \textbf{TAPT 1} & \textbf{TAPT 2} & \textbf{DAPT/TAPT}  \\
-\hline
-\hline
- \multicolumn{5}{|c|}{\textbf{SeqBN}} \\
-\hline
-Perplexity (Before) & 4.97 & 6.24 & 13.10 & 4.83  \\
-Perplexity (After) & 4.80 & 4.44 & 4.50  & 4.31  \\
-\hline
- \multicolumn{5}{|c|}{\textbf{Unipelt}} \\
-\hline
-Perplexity (Before) & 4.94 & 6.15 & 12.24 & 4.81  \\
-Perplexity (After) & 4.75 & 4.39 & 4.62  & 4.27  \\
-\hline
-\end{tabular}
-\label{table:11}
-\end{table*}
+As for the full pertaining, there is a decrease in masked LM loss, indicating effective pretraining using adapters; see results in \ref{appendix:masked_lm_adapters}. 
 
 \subsubsection{Adapters: Downstream Classification}
 \textbf{Experiments Setup.}
-The next step was to assess the effect of the pre-training step to the downstream classification task using adapters. The Transformers API was used to run the classification. In contrast to full pretraining, the classification did not require loading a whole pretrained model. The pre-trained adapter and classification head was added to the base roberta model, the uploaded adapter was then activated (to be used for inference), and set to be trained (for classification fine-tuning). The main model weights were kept frozen.
+The next step was to assess the effect of the pretraining step on the downstream classification task using adapters. In contrast to full pretraining, the classification did not require loading a whole pretrained model. The trained adapter and classification head were added to the base Roberta model; the uploaded adapter was then trained, when the main model weights were kept frozen.
 
-The same training configuration of a trainer was used here as for a full fine-tuning model with the following difference: the learning rate of \textbf{0.0001 }was used for adapters instead of the the learning rate of \textbf{0.00002 }used for the full fine-tuning; see the \textbf{Adapter Tuning: Learning Rate for details}.
+The same training configuration was used here as for a full fine-tuning model with the following difference: the learning rate of \textbf{0.0001} was used for adapters instead of the learning rate of \textbf{0.00002} used for the full fine-tuning; see the Adapter Tuning: Learning Rate for details.
 
 \textbf{Results and Analysis}.
 Table \ref{table:4} shows the results of the classification.
 
-\begin{table*}[ht]
+\begin{table}[ht]
 \centering
-\caption{Adapter-Based Fine-Tuning Results (Helpfullness Task): F1-Macro}
+\caption{Adapter-Based Fine-Tuning Results (Helpfulness Task): F1-Macro}
 \small  % This reduces the font size
 \begin{tabular}{|c|c|c|c|c|}
 \hline
-\textbf{Base RoBERTa}& \textbf{DAPT (5M)} & \textbf{TAPT 1} & \textbf{TAPT 2} & \textbf{DAPT/TAPT} \\
+\textbf{RoBERTa}& \textbf{DAPT} & \textbf{TAPT 1} & \textbf{TAPT 2} & \textbf{DAPT/TAPT} \\
 \hline
 \hline
  \multicolumn{5}{|c|}{\textbf{SeqBN}} \\
@@ -161,37 +99,26 @@ Table \ref{table:4} shows the results of the classification.
 \hline
 \end{tabular}
 \label{table:4}
-\end{table*}
+\end{table}
 
-We observed the following results:
-\begin{itemize}
-    \item The baseline RoBERTa metrics were reproduced with both types of adapters
-    \item The baseline RoBERTa results were improved for most of the configurations with pre-training 
-    \item Both SeqBN and Unipelt configurations where improved with TAPT pre-training
-    \item Unipelt adapter shows a slight worsening with DAPT, and DAPT/TAPT pretraining
-\end{itemize}
+The baseline RoBERTa metrics \textbf{were reproduced} with both types of adapters. Also, the baseline RoBERTa results \textbf{were improved} for most of the configurations with pretraining. \textbf{Both SeqBN and Unipelt configurations} where \textbf{improved with TAPT pertaining}. \textbf{Unipelt} adapter shows a \textbf{slight worsening} with \textbf{DAPT}, and \textbf{DAPT/TAPT pretraining}.
 
-The following reasons might explain the difference between SeqBN and Unipelt:
-\begin{itemize}
-    \item The baseline metric is slightly higher for Unipelt, that may indicate that using a larger and more complex configuration can help with improving the baseline. 
-    \item Considering more complex adapter and more weights to be trained, the DAPT for Unipelt may require more data to boost the metrics. For TAPT the dataset is smaller, however, the data is more specific to the downstream task, which can explain why even a small set gives some improvement here. 
-    \item DAPT+TAPT model may not always lead to the improvement even if DAPT or TAPT does for the similar reasons as for the full-pretraining.
-\end{itemize}
+The following reasons might explain the difference between SeqBN and Unipelt: the baseline metric is slightly higher for Unipelt, which may indicate that using a larger and more complex configuration can help with improving the baseline; considering more complex adapter and more weights to be trained, the DAPT for Unipelt may require more data to boost the metrics. For TAPT the dataset is smaller, however, the data is more specific to the downstream task, which can explain why even a small set gives some improvement here; DAPT+TAPT model may not always lead to the improvement even if DAPT or TAPT does for the similar reasons as for the full-pretraining.
 
 \subsubsection{Adapters Tuning: Learning Rate}
 \textbf{Experiments Setup.}
-The goal of these experiments was to evaluate the effect of the hyper-parameter tuning of the adapters. What was observed is that tuning the learning rate have a significant effect on the classification performance.
+The goal of these experiments was to evaluate the effect of the hyper-parameter tuning of the adapters. What was observed is that tuning the learning rate has a significant effect on the classification performance.
 
 \textbf{Results and Analysis.}
-Table \ref{table:5} shows the results of the experiments. In contrast to a full fine-tunine, where all the weights are effected by training, with adapters only a small subset of weights are fine-tuned. With the full fine-tuning a higher learning rate may lead to forgetting the pre-training knowledge, while there is no such a risk for adapters. Also, for the base RoBERTa the adapters are initialized with random weights which may require higher learning rate to converge to the optimal results.
-
-\begin{table*}[ht]
+Table \ref{table:5} shows the results of the experiments. In contrast to a full fine-tuning, where all the weights are affected by training, with adapters, only a small subset of weights are fine-tuned. With full fine-tuning, a \textbf{higher learning rate} may lead to forgetting the pretraining knowledge, while there is no such risk for adapters. Also, for the base RoBERTa, the adapters are initialized with random weights, which may require a higher learning rate to converge to the optimal results.
+\begin{table}[]
 \centering
-\caption{Adapters Classification Results on Different Learning Rates (Helpfullness Task): F1-Macro}
+\caption{Adapters Classification Results on Different Learning Rates (Helpfulness Task): F1-Macro}
 \small  % This reduces the font size
 \begin{tabular}{|c|c|c|c|}
 \hline
-\textbf{Base Roberta - lr: 2.00E-05}& \textbf{DAPT (5M) - lr: 2.00E-05} & \textbf{Base Roberta - lr: 1.00E-04} & \textbf{DAPT (5M) - lr: 1.00E-04}\\
+\textbf{RoBERTa}& \textbf{DAPT (5M)} & \textbf{RoBERTa} & \textbf{DAPT (5M)}\\
+\textbf{lr: 2.00E-05}& \textbf{lr: 2.00E-05} & \textbf{lr: 1.00E-04} & \textbf{lr: 1.00E-04}\\
 \hline
 \hline
  \multicolumn{4}{|c|}{\textbf{SeqBN}} \\
@@ -204,22 +131,17 @@ Table \ref{table:5} shows the results of the experiments. In contrast to a full 
 \hline
 \end{tabular}
 \label{table:5}
-\end{table*}
-
+\end{table}
 \subsubsection{Adapters Configurations: One Adapter vs Two Adapters}
 \textbf{Experiments Setup.}
-An additional experiment was run to compare the following approaches:
-\begin{enumerate}
-    \item Using the same adapter for both TAPT pre-training and further classification
-    \item Adding an additional adapter to the classification stage, while freezing the previously pre-trained adapter
-\end{enumerate}
+An additional experiment was run to compare the following approaches: using the same adapter for both TAPT pretraining and further classification and adding an additional adapter to the classification stage while freezing the previously pretrained adapter.
 
 \textbf{Results and Analysis.}
-See Table \ref{table:6} for results. The results show that there is no significant difference between the two configurations. Adding an adapter for SeqBN led to a slight increase in classification metrics while adding an additional adapter to Unipelt led to a slight decrease. The difference may be explained by the size of the adapters. E.g., Unipelt has more weights, and it may be the case that using a new adapter initialized randomly for classification requires more data to get improvement. At the same time, the SeqBN adapter, which is smaller, may benefit from freezing the pre-trained adapter and adding a classification adapter on top of the pre-trained one.
+See Table \ref{table:6} for results. The results show that there is \textbf{no significant difference} between the two configurations. Adding an adapter for SeqBN led to a slight increase in classification metrics while adding an additional adapter to Unipelt led to a slight decrease. The difference may be explained by the size and the difference in architecture of the adapters. For example, Unipelt has more weight and is more complex, and it may be the case that using a new adapter initialized randomly for classification requires more data to get improvement. At the same time, the SeqBN adapter, which is smaller, may benefit from freezing the pretrained adapter and adding a classification adapter on top of the pretrained one.
 
 \begin{table}[ht]
 \centering
-\caption{Adapters Classification Results on Different Configurations (Helpfullness Task): F1-Macro}
+\caption{Adapters Classification Results on Different Configurations (Helpfulness Task): F1-Macro}
 \small  % This reduces the font size
 \begin{tabular}{|c|c|}
 \hline
@@ -238,78 +160,43 @@ See Table \ref{table:6} for results. The results show that there is no significa
 \label{table:6}
 \end{table}
 
-
-
-\begin{table}[ht]
-\centering
-\caption{Micro SeqBn}
-\small  % This reduces the font size
-\begin{tabular}{|c|c|}
-\hline
-\textbf{No Pretraining}& \textbf{TAPT}\\
-\hline
-\hline
- \multicolumn{2}{|c|}{\textbf{Base}} \\
-\hline
-65.25 & \textbf{66.24}\\
-\hline
- \multicolumn{2}{|c|}{\textbf{seq\_bn\ LR 0.0001}} \\
-\hline
-64.52 &\textbf{64.93} \\
-\hline
- \multicolumn{2}{|c|}{\textbf{seq\_bn LR 0.0002}} \\
-\hline
-65.84 &\textbf{66.24} \\
-\hline
- \multicolumn{2}{|c|}{\textbf{10k rows seq\_bn LR 0.0001}} \\
-\hline
-65.56&\textbf{66.11} \\
-\hline
-\end{tabular}
-\label{table:7}
-\end{table}
-
 \subsubsection{Adapters Scaling: TAPT on Micro-Sets Experiments}
 \textbf{Experiments Setup.}
-The goal of this set of experiments was to evaluate the effect of the TAPT pre-training on classification performance by varying the amount of training.
-
+The goal of this set of experiments was to evaluate the effect of the TAPT pretraining on classification performance by varying the amount of training.
 
 \textbf{Results and Analysis.}
-
-First we investigated if we would see a TAPT benefit using the smaller Micro Help dataset using 1, 5 and 10 epochs of pre-training.  When using 1 epoch, we reduced the batch size and removed gradient accumulation so that we would have more training steps.   \textbf{Figure \ref{fig:micro_help_class_vs_pretraining_epochs} } shows that we were able to produce a positive result with just 1 epoch, which was very encouraging.  10 epochs showed better results, but 5 showed worse.  We can see the standard deviation on 5 epochs is much higher, so we did another experiment looking at more pre training.  
-
+First, we investigated if we would see a TAPT benefit with the smaller Micro Help dataset using 1, 5, and 10 epochs of pretraining. When using 1 epoch, we reduced the batch size and removed gradient accumulation so that we would have more training steps. \textbf{Figure \ref{fig:micro_help_class_vs_pretraining_epochs} } shows that we were able to produce a \textbf{positive result} with \textbf{just 1 epoch}. 10 epochs showed a more significant improvement, but 5 showed slightly less distinct boost. We can see the standard deviation on 5 epochs is much higher, so we did another experiment looking at more pretraining.
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=\linewidth]{figures/micro_help_class_vs_pretraining_epochs.png}
-\caption{This shows the results of TAPT on the Amazon Helpfulness 5k reviews dataset using different amounts of pre training.}
+\includegraphics[scale=0.45]{figures/micro_help_class_vs_pretraining_epochs.png}
+\caption{This shows the results of TAPT on the Amazon Helpfulness 5k reviews dataset using different amounts of pretraining.}
 \label{fig:micro_help_class_vs_pretraining_epochs}
 \end{figure}
 
-\textbf{Figure \ref{fig:micro_class_vs_epochs} } shows that the evaluation loss of the masked language model pre-training does not seem to be correlated to classification results. As loss goes down, classification results move up and down.
-
+\textbf{Figure \ref{fig:micro_class_vs_epochs} } shows that the evaluation loss of the masked language model pretraining does not seem to be correlated to classification results. As loss goes down, classification results move up and down.
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=\linewidth]{figures/micro_class_vs_epochs.png}
+\includegraphics[scale=0.45]{figures/micro_class_vs_epochs.png}
 \caption{This shows the results of classification with three different datasets before and after Task Adaptive PreTraining (TAPT)}
 \label{fig:micro_class_vs_epochs}
 \end{figure}
 
-Having established that just 1 epoch of pre-training is effective, we wanted to confirm that worked for other datasets.  \textbf{Figure \ref{fig:micro_class_1_epoch_pretrain} } shows that 1 epoch of pre training improved classification results for all three datasets, which provides a diversity of size, data balance and domain.  
+Having established that just 1 epoch of pretraining is effective, we wanted to confirm that worked for other datasets. \textbf{Figure \ref{fig:micro_class_1_epoch_pretrain} } shows that 1 epoch of pretraining improved classification results for all three datasets, which provides a diversity of size, data balance, and domain.  
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=\linewidth]{figures/micro_class_1_epoch_pretrain.png}
-\caption{This shows the positive impact of doing only 1 epoch of TAPT pre training across three different datasets, which are of different size, balanced and imbalanced}
+\includegraphics[scale=0.45]{figures/micro_class_1_epoch_pretrain.png}
+\caption{This shows the positive impact of doing only 1 epoch of TAPT pretraining across three different datasets, which are of different size, balanced and imbalanced}
 \label{fig:micro_class_1_epoch_pretrain}
 \end{figure}
 
-At this point, we had a very useful finding, but also a concern.  The classification using no TAPT uses a randomly initialized adapter.  Was the pre-training step simply creating a word focused initialization that really was not specific to the task data?   \textbf{Figure \ref{fig:micro_class_pretrain_datasets} } compares the Micro Help classification task using different pre trained adapters.  This shows that classification only improved with the task specific pre training, not with pre training on different sets of task data.  
+The classification using no TAPT uses a randomly initialized adapter. Was the pretraining step simply creating a word focused initialization that really was not specific to the task data? In order to verify it, we ran another experiment, where we TAPT pre-trained model on relevant and irrelevant task data. We had a very useful finding, which supports that the TAPT pre-training is effective in this setting only if used with relevant task data. \textbf{Figure \ref{fig:micro_class_pretrain_datasets} } compares the Micro Help classification task using different pretrained adapters. This shows that classification only improved with task-specific pretraining, not with pre-training on different sets of task data.  
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=\linewidth]{figures/micro_help_class_cross_pretrain.png}
-\caption{This shows classification results for the Amazon Helpfulness 5k reviews dataset with using different TAPT pre trained models.}
+\includegraphics[scale=0.45]{figures/micro_help_class_cross_pretrain.png}
+\caption{This shows classification results for the Amazon Helpfulness 5k reviews dataset using different TAPT pretrained models.}
 \label{fig:micro_class_pretrain_datasets}
 \end{figure}

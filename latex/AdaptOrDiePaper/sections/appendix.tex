@@ -1,4 +1,35 @@
+\begin{appendices}
+\section {Additional Tables for Adapters Scaling Experiments}
 \begin{table}[ht]
+\centering
+\caption{Micro SeqBn}
+\small  % This reduces the font size
+\begin{tabular}{|c|c|}
+\hline
+\textbf{No Pretraining}& \textbf{TAPT}\\
+\hline
+\hline
+ \multicolumn{2}{|c|}{\textbf{Base}} \\
+\hline
+65.25 & \textbf{66.24}\\
+\hline
+ \multicolumn{2}{|c|}{\textbf{seq\_bn\ LR 0.0001}} \\
+\hline
+64.52 &\textbf{64.93} \\
+\hline
+ \multicolumn{2}{|c|}{\textbf{seq\_bn LR 0.0002}} \\
+\hline
+65.84 &\textbf{66.24} \\
+\hline
+ \multicolumn{2}{|c|}{\textbf{10k rows seq\_bn LR 0.0001}} \\
+\hline
+65.56&\textbf{66.11} \\
+\hline
+\end{tabular}
+\label{table:7}
+\end{table}
+
+\begin{table}[Ht]
 \centering
 \caption{Micro ParBn}
 \small  % This reduces the font size
@@ -27,7 +58,7 @@
 \label{table:8}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[Ht]
 \centering
 \caption{Micro ParBn - Sources}
 \small  % This reduces the font size
@@ -56,7 +87,7 @@
 \label{table:9}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[Ht]
 \centering
 \caption{Micro ParBn - Training Epochs}
 \small  % This reduces the font size
@@ -88,3 +119,50 @@
 \end{tabular}
 \label{table:10}
 \end{table}
+
+\section {Additional Tables for Pre-Training Results}
+\begin{table*}[Ht]
+\label{appendix:masked_lm_full}
+\centering
+\caption{Full Pretraining: Masked LM Perplexity}
+\small  % This reduces the font size
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+& \textbf{DAPT (5M)} & \textbf{DAPT (25M)} & \textbf{TAPT 1} & \textbf{DAPT/TAPT}  \\
+\hline
+\hline
+Perplexity (Before) & 6.360 & 6.297 & 6.360 & 6.360  \\
+Perplexity (After) & 4.554 & 4.109 & 4.281  & 4.240  \\
+\hline
+\end{tabular}
+\label{table:1}
+\end{table*}
+
+\begin{table*}[Ht]
+\label{appendix:masked_lm_adapters}
+\centering
+\caption{Adapter-Based Pre-training: Masked LM Perplexity}
+\small  % This reduces the font size
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+& \textbf{DAPT (5M)} & \textbf{TAPT 1} & \textbf{TAPT 2} & \textbf{DAPT/TAPT}  \\
+\hline
+\hline
+ \multicolumn{5}{|c|}{\textbf{SeqBN}} \\
+\hline
+Perplexity (Before) & 4.97 & 6.24 & 13.10 & 4.83  \\
+Perplexity (After) & 4.80 & 4.44 & 4.50  & 4.31  \\
+\hline
+ \multicolumn{5}{|c|}{\textbf{Unipelt}} \\
+\hline
+Perplexity (Before) & 4.94 & 6.15 & 12.24 & 4.81  \\
+Perplexity (After) & 4.75 & 4.39 & 4.62  & 4.27  \\
+\hline
+\end{tabular}
+\label{table:11}
+\end{table*}
+
+\section {Training Configurations}
+\label{appendix:train_config}
+
+\end{appendices}
