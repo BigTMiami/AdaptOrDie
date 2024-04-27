@@ -6,6 +6,7 @@ from transformers import (
     DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
+    RobertaForSequenceClassification
 )
 from sklearn.metrics import accuracy_score,  f1_score
 
@@ -16,6 +17,7 @@ from transformers import TrainingArguments
 from adapters import AdapterTrainer
 from transformers import AutoConfig
 from adapters import AutoAdapterModel
+from adapters import UniPELTConfig, SeqBnConfig
 
 def compute_metrics(pred, average = 'macro'):
     labels = pred.label_ids
@@ -34,10 +36,13 @@ def compute_metrics(pred, average = 'macro'):
     
     
 def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 'roberta-base', \
- torch_compile = True,train = True, evaluate_on_test = True, adapter_hub_name = None, learning_rate=2e-5):
+ torch_compile = True,train = True, evaluate_on_test = True, adapter_hub_name = None, learning_rate=2e-5,
+ classification_adapter_name = None, freeze_pretrain = False, resume_from_checkpoint = False,
+ weight_decay=0.01):
     print("Early stopping with best val on f1 macro")
-    print("Classification task: {0}, pretrained model: {1}, lr: {2}".format(classification_task, pretrained_model,
-    learning_rate))
+    print("Resume from the checkpoint: {0}".format(resume_from_checkpoint))
+    print("Classification task: {0}, pretrained model: {1}, lr: {2}, weight_decay: {3}".format(classification_task, 
+    pretrained_model, learning_rate, weight_decay))
     
     if classification_task == 'helpfulness':
         dataset = load_dataset("BigTMiami/amazon_helpfulness")
@@ -70,7 +75,13 @@ def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 
     print("Classification config: {0}".format(classification_config))
     
     if not adapter_hub_name:
-      model = AutoModelForSequenceClassification.from_pretrained(pretrained_model,  config=classification_config)
+      model = RobertaForSequenceClassification.from_pretrained(pretrained_model,  config=classification_config)
+      if freeze_pretrain:
+        for param in model.roberta.parameters():
+            param.requires_grad = False
+        for name, param in model.named_parameters():
+            print(name, param.requires_grad)
+
     else:
       model = AutoAdapterModel.from_pretrained(pretrained_model,  config=classification_config)
 
@@ -78,11 +89,24 @@ def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 
       loaded_adapter_name = model.load_adapter(adapter_hub_name, with_head=False)
       model.add_classification_head(loaded_adapter_name, num_labels=2, id2label=id2label)
 
-      # Activate the adapter
-      model.set_active_adapters(loaded_adapter_name) 
+      if not classification_adapter_name:
+        # Activate the adapter
+        model.set_active_adapters(loaded_adapter_name) 
 
-      # Set the adapter to be used for training
-      model.train_adapter(loaded_adapter_name)
+        # Set the adapter to be used for training
+        model.train_adapter(loaded_adapter_name)
+      
+      else:
+        # Add new adapter for classification
+        new_adapter_config = SeqBnConfig() if classification_adapter_name == "seq_bn" else UniPELTConfig()
+        new_adapter_name = classification_adapter_name
+        new_adapter_hub_name = "classification_{0}_adapter".format(new_adapter_name)
+
+        model.add_adapter(new_adapter_name, config=new_adapter_config)
+        model.train_adapter(new_adapter_name)
+
+        # Activate both old and new adapters
+        model.set_active_adapters([loaded_adapter_name,new_adapter_name])
 
       summary = model.adapter_summary()
       print(summary)
@@ -98,7 +122,7 @@ def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 
         # Lyudmila: changed from 3 to 10 -> used for small roberta
         # Lyudmila: changed back to 3 as agreed
         num_train_epochs=10,  
-        weight_decay=0.01,
+        weight_decay=weight_decay,
         warmup_ratio=0.06, # Paper: warmup proportion of 0.06
         adam_epsilon=1e-6, # Paper 1e-6 (huggingface default 1e-08)
         adam_beta1=0.9, # Paper: Adam weights 0.9
@@ -146,7 +170,7 @@ def run_classifier(output_dir, classification_task = 'imdb', pretrained_model = 
     print("Trainer args: {0}".format(trainer.args))
     
     if train:
-      trainer.train()
+      trainer.train(resume_from_checkpoint = resume_from_checkpoint)
 
     if evaluate_on_test:
       print("Evaluating model on test set")
